@@ -7,6 +7,7 @@ import com.root.meter.constants.Constants;
 import com.root.meter.model.Bill;
 import com.root.meter.model.Meter;
 import com.root.meter.model.Payment;
+import com.root.meter.service.MeterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,8 @@ import java.time.LocalDate;
 
 @Controller
 public class BillController {
+    @Autowired
+    private MeterService meterService;
     @Value("${STRIPE_PUBLIC_KEY}")
     private String stripePublicKey;
 
@@ -34,9 +37,11 @@ public class BillController {
         Mono<ResponseEntity<Payment>> paymentMono = paymentClient.get().retrieve().toEntity(Payment.class);
 
         LocalDate lastPaymentDate = paymentMono.block().getBody().getPaymentDate();;
-        WebClient webClientOfMeter = WebClient.create(Constants.METER_API_GET_BY_ID + user.getMeterId());
-        Mono<ResponseEntity<Meter>> meterMono = webClientOfMeter.get().retrieve().toEntity(Meter.class);
-        Meter meter = meterMono.block().getBody();
+        //WebClient webClientOfMeter = WebClient.create(Constants.METER_API_GET_BY_ID + user.getMeterId());
+        //
+        //Mono<ResponseEntity<Meter>> meterMono = webClientOfMeter.get().retrieve().toEntity(Meter.class);
+        //Meter meter = meterMono.block().getBody();
+        Meter meter = meterService.findById(user.getMeterId());
         Bill bill = new Bill(user,
                              meter.getEnergyDebt(),
                             meter.getDebt(),
